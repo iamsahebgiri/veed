@@ -2,6 +2,8 @@
 docker compose --env-file .env up
 ```
 
+![Architecture for understanding](art/arch.png)
+
 # Tech
 
 TUSd - 0.0.0.0:8080 
