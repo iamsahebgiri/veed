@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Veed - Video transcoding pipeline</title>
+    <link
+      href="https://releases.transloadit.com/uppy/v4.7.0/uppy.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .uppy-size--md .uppy-Dashboard-AddFiles-info {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Veed - Video transcoding pipeline</h1>
+    <noscript>You need JavaScript enabled for this example to work.</noscript>
+    <button id="uppyModalOpener">Open Modal</button>
+    <script type="module">
+      import {
+        Uppy,
+        Dashboard,
+        Webcam,
+        Tus,
+      } from "https://releases.transloadit.com/uppy/v4.8.0/uppy.min.mjs";
+
+      const uppy = new Uppy({
+        debug: true,
+        autoProceed: false,
+        restrictions: {
+          maxFileSize: 1024 * 1024 * 1024, // 1GB
+          allowedFileTypes: ["video/*"],
+        },
+      })
+        .use(Dashboard, { trigger: "#uppyModalOpener" })
+        .use(Webcam, { target: Dashboard })
+        .use(Tus, { endpoint: "http://localhost:8080/api/uploads" });
+
+      uppy.on("success", (fileCount) => {
+        console.log(`${fileCount} files uploaded`);
+      });
+    </script>
+  </body>
+</html>

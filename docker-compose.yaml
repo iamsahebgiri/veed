@@ -1,0 +1,48 @@
+services:
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    volumes:
+        - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+        - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+        - common_net
+  
+  minio:
+    image: minio/minio
+    command: server --address ":9000" --console-address ":9001" /data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+    volumes:
+      - minio_data:/data
+
+  tusd:
+      image: tusproject/tusd:latest
+      command: -verbose -s3-bucket raw-uploads -s3-endpoint http://host.docker.internal:9000 -port 8080 -hooks-grpc host.docker.internal:8090 -base-path /api/uploads
+      ports:
+        - "8080:8080"
+      volumes:
+        - tusd_data:/data
+      environment:
+        - AWS_REGION=${MINIO_REGION}
+        - AWS_ACCESS_KEY_ID=${MINIO_ACCESS_KEY}
+        - AWS_SECRET_ACCESS_KEY=${MINIO_SECRET_KEY}
+      networks:
+        - common_net
+
+volumes:
+  minio_data:
+  tusd_data:
+
+networks:
+  common_net:
+    driver: bridge
